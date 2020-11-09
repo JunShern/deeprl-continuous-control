@@ -1,24 +1,27 @@
 from unityagents import UnityEnvironment
+import agents
 import matplotlib.pyplot as plt
 import numpy as np
 
 class Trainer:
-    def __init__(self, env):
+    def __init__(self, agent, env):
+        self.agent = agent
         self.env = env
 
     def train(self, n_episodes=10):
         all_agent_scores = []
         for i in range(n_episodes):
-            
+
             _, states, _ = env.reset()
             scores = np.zeros(self.env.num_agents)
             while True:
                 # select an action (for each agent)
-                actions = np.random.randn(self.env.num_agents, self.env.action_size)
-                actions = np.clip(actions, -1, 1)
+                actions = [self.agent.act(state, add_noise=True) for state in states]
 
                 # Act
                 rewards, next_states, dones = self.env.step(actions)
+                for state, action, reward, next_state, done in zip(states, actions, rewards, next_states, dones):
+                    self.agent.step(state, action, reward, next_state, done)
 
                 # Update
                 scores += rewards
@@ -33,7 +36,7 @@ class Trainer:
             
             all_agent_scores.append(scores)
             print(scores)
-            print('Total score (averaged over agents) this episode: {}'.format(np.mean(scores)))
+            print('Total score (averaged over agents) episode {}: {}'.format(i, np.mean(scores)))
             # print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_deque)), end="")
             # torch.save(agent.actor_local.state_dict(), 'checkpoint_actor.pth')
             # torch.save(agent.critic_local.state_dict(), 'checkpoint_critic.pth')
@@ -79,7 +82,8 @@ class EnvUnityMLAgents:
 if __name__ == "__main__":
     # Setup
     env = EnvUnityMLAgents("./Reacher_Linux_20_Agents_NoVis/Reacher.x86_64")
-    trainer = Trainer(env)
+    agent = agents.DDPGAgent(env.state_size, env.action_size, random_seed=0)
+    trainer = Trainer(agent, env)
 
     # Train
     NUM_EPISODES = 10
@@ -92,7 +96,7 @@ if __name__ == "__main__":
     for agent_idx in range(all_scores.shape[1]):
         plt.plot(all_scores[:, agent_idx])
     plt.fill_between(x=range(NUM_EPISODES), y1=all_scores.min(axis=1), y2=all_scores.max(axis=1), alpha=0.2)
-    plt.plot(all_scores.mean(axis=1), color='white', linewidth=4)
+    plt.plot(all_scores.mean(axis=1), color='black', linewidth=2)
     plt.ylabel("score")
     plt.xlabel("episode")
     plt.savefig("scores.png")
