@@ -10,12 +10,14 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 BUFFER_SIZE = int(1e5)  # replay buffer size
-BATCH_SIZE = 128        # minibatch size
+BATCH_SIZE = 1024        # minibatch size
 GAMMA = 0.99            # discount factor
 TAU = 1e-3              # for soft update of target parameters
 LR_ACTOR = 1e-4         # learning rate of the actor 
 LR_CRITIC = 1e-3        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
+LEARN_EVERY = 20        # learn on every ?th step
+UPDATES_PER_LEARN = 10  # perform ? updates per learn
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -34,6 +36,7 @@ class DDPGAgent():
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(random_seed)
+        self.step_counter = 0
 
         # Actor Network (w/ Target Network)
         self.actor_local = Actor(state_size, action_size, random_seed).to(device)
@@ -57,9 +60,11 @@ class DDPGAgent():
         self.memory.add(state, action, reward, next_state, done)
 
         # Learn, if enough samples are available in memory
-        if len(self.memory) > BATCH_SIZE:
-            experiences = self.memory.sample()
-            self.learn(experiences, GAMMA)
+        if len(self.memory) > BATCH_SIZE and self.step_counter % LEARN_EVERY == 0:
+            for _ in range(UPDATES_PER_LEARN):
+                experiences = self.memory.sample()
+                self.learn(experiences, GAMMA)
+        self.step_counter += 1
 
     def act(self, state, add_noise=True):
         """Returns actions for given state as per current policy."""

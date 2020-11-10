@@ -2,11 +2,13 @@ from unityagents import UnityEnvironment
 import agents
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
 class Trainer:
     def __init__(self, agent, env):
         self.agent = agent
         self.env = env
+        self.last_time = time.time()
 
     def train(self, n_episodes=10):
         all_agent_scores = []
@@ -35,8 +37,9 @@ class Trainer:
                     break
             
             all_agent_scores.append(scores)
-            print(scores)
-            print('Total score (averaged over agents) episode {}: {}'.format(i, np.mean(scores)))
+            t = time.time()
+            print('Total score (averaged over agents) episode {}: {} ({:.2f}s)'.format(i, np.mean(scores), t - self.last_time))
+            self.last_time = t
             # print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_deque)), end="")
             # torch.save(agent.actor_local.state_dict(), 'checkpoint_actor.pth')
             # torch.save(agent.critic_local.state_dict(), 'checkpoint_critic.pth')
@@ -81,16 +84,15 @@ class EnvUnityMLAgents:
 
 if __name__ == "__main__":
     # Setup
-    env = EnvUnityMLAgents("./Reacher_Linux_20_Agents_NoVis/Reacher.x86_64")
+    # env = EnvUnityMLAgents("./Reacher_Linux_20_Agents_NoVis/Reacher.x86_64")
+    env = EnvUnityMLAgents("./Reacher_Linux_1_Agent_NoVis/Reacher.x86_64")
     agent = agents.DDPGAgent(env.state_size, env.action_size, random_seed=0)
     trainer = Trainer(agent, env)
 
     # Train
-    NUM_EPISODES = 10
+    NUM_EPISODES = 200
     all_scores = trainer.train(n_episodes=NUM_EPISODES)    
     env.close()
-
-    print(all_scores)
 
     plt.figure(figsize=(20, 10))
     for agent_idx in range(all_scores.shape[1]):
