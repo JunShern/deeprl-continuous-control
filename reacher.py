@@ -18,7 +18,7 @@ class Trainer:
             scores = np.zeros(self.env.num_agents)
             while True:
                 # select an action (for each agent)
-                actions = [self.agent.act(state, add_noise=True) for state in states]
+                actions = self.agent.act(states, add_noise=True) # Network expects inputs in batches so feed all at once
 
                 # Act
                 rewards, next_states, dones = self.env.step(actions)
