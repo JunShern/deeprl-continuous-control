@@ -16,6 +16,7 @@ class Trainer:
 
             _, states, _ = env.reset()
             scores = np.zeros(self.env.num_agents)
+            timestep = 0
             while True:
                 # select an action (for each agent)
                 actions = self.agent.act(states, add_noise=True) # Network expects inputs in batches so feed all at once
@@ -23,7 +24,7 @@ class Trainer:
                 # Act
                 rewards, next_states, dones = self.env.step(actions)
                 for state, action, reward, next_state, done in zip(states, actions, rewards, next_states, dones):
-                    self.agent.step(state, action, reward, next_state, done)
+                    self.agent.step(state, action, reward, next_state, done, timestep)
 
                 # Update
                 scores += rewards
@@ -35,10 +36,11 @@ class Trainer:
                     # This termination criteria may cause us to never learn the late-game states,
                     # but it should be fine in this case since the problem does not evolve over time
                     break
+                timestep += 1
             
             all_agent_scores.append(scores)
             t = time.time()
-            print('Total score (averaged over agents) episode {}: {} ({:.2f}s)'.format(i, np.mean(scores), t - self.last_time))
+            print('Episode {} ({:.2f}s) -- Min: {} -- Max: {} -- Mean: {}'.format(i, t - self.last_time, np.min(scores), np.max(scores), np.mean(scores)))
             self.last_time = t
             # print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, np.mean(scores_deque)), end="")
             # torch.save(agent.actor_local.state_dict(), 'checkpoint_actor.pth')
@@ -84,13 +86,13 @@ class EnvUnityMLAgents:
 
 if __name__ == "__main__":
     # Setup
-    # env = EnvUnityMLAgents("./Reacher_Linux_20_Agents_NoVis/Reacher.x86_64")
-    env = EnvUnityMLAgents("./Reacher_Linux_1_Agent_NoVis/Reacher.x86_64")
+    env = EnvUnityMLAgents("./Reacher_Linux_20_Agents_NoVis/Reacher.x86_64")
+    # env = EnvUnityMLAgents("./Reacher_Linux_1_Agent_NoVis/Reacher.x86_64")
     agent = agents.DDPGAgent(env.state_size, env.action_size, random_seed=0)
     trainer = Trainer(agent, env)
 
     # Train
-    NUM_EPISODES = 200
+    NUM_EPISODES = 100
     all_scores = trainer.train(n_episodes=NUM_EPISODES)    
     env.close()
 

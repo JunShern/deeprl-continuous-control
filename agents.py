@@ -36,7 +36,6 @@ class DDPGAgent():
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(random_seed)
-        self.step_counter = 0
 
         # Actor Network (w/ Target Network)
         self.actor_local = Actor(state_size, action_size, random_seed).to(device)
@@ -54,17 +53,16 @@ class DDPGAgent():
         # Replay memory
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
     
-    def step(self, state, action, reward, next_state, done):
+    def step(self, state, action, reward, next_state, done, timestep):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
         self.memory.add(state, action, reward, next_state, done)
 
         # Learn, if enough samples are available in memory
-        if len(self.memory) > BATCH_SIZE and self.step_counter % LEARN_EVERY == 0:
+        if len(self.memory) > BATCH_SIZE and timestep % LEARN_EVERY == 0:
             for _ in range(UPDATES_PER_LEARN):
                 experiences = self.memory.sample()
                 self.learn(experiences, GAMMA)
-        self.step_counter += 1
 
     def act(self, state, add_noise=True):
         """Returns actions for given state as per current policy."""
