@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import copy
+import os
 from collections import namedtuple, deque
 
 from model import Actor, Critic
@@ -139,6 +140,10 @@ class DDPGAgent():
         """
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
+
+    def save(self, path="./"):
+        torch.save(self.actor_local.state_dict(), os.path.join(path, 'checkpoint_actor.pth'))
+        torch.save(self.critic_local.state_dict(), os.path.join(path, 'checkpoint_critic.pth'))
 
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
