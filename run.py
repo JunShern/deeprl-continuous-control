@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     scores = np.zeros(env.num_agents)
     while True:
-        actions = agent.act(states)
+        actions = agent.act(states, add_noise=False)
         rewards, states, dones = env.step(actions)
         scores += rewards
         if np.any(dones):

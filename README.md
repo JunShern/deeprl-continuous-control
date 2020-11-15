@@ -7,9 +7,9 @@ The assignment is to train an agent that solves the Unity ML-Agents [Reacher](ht
 
 The solution implements a Deep Deterministic Policy Gradient algorithm based on [[1]](#ddpg_paper) to solve the environment. For implementation and algorithm details, please see [Report.md](Report.md).
 
-![trained_agent](assets/trained_agent.gif)
+![trained_agent](assets/early_agent.gif)
 
-_The goal of the environment is to effectively control a double-jointed robot arm to follow a moving target location (visualized as a green sphere). The gif above shows 20 such agents performing the task - the environment provides the option of parallel agents for more effective training._
+_The goal of the environment is to effectively control a double-jointed robot arm to follow a moving target location (visualized as a green sphere). The environment provides the option of parallel agents for more effective training; the gif above shows 20 such agents performing the task at an early stage of training - some do well, some do poorly. To see all 20 agents performing well, check out [Report.md](Report.md)!_
 
 #### Environment
 
@@ -88,4 +88,4 @@ deactivate
 
 ## References
 
-- <a name="dqn_paper">[1]</a> Lillicrap, Timothy P., et al. "Continuous control with deep reinforcement learning." arXiv preprint arXiv:1509.02971 (2015).
+- <a name="ddpg_paper">[1]</a> Lillicrap, Timothy P., et al. "Continuous control with deep reinforcement learning." arXiv preprint arXiv:1509.02971 (2015).

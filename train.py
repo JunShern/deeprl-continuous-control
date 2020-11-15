@@ -1,6 +1,8 @@
 from lib import env, agents
+import argparse
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 import time
 
 class Trainer:
@@ -9,7 +11,7 @@ class Trainer:
         self.env = env
         self.last_time = time.time()
 
-    def train(self, average_window = 100, solve_score = 30, max_episodes = 200):
+    def train(self, average_window = 100, solve_score = 30, max_episodes = 200, save_dir = "./"):
         all_agent_scores = []
         for i in range(max_episodes):
 
@@ -45,17 +47,20 @@ class Trainer:
             self.last_time = t
             if mvg_avg > 30 and len(all_agent_scores) >= 100:
                 break
-
+        
         # Save model
-        self.agent.save()
-        return np.array(all_agent_scores)
+        self.agent.save(path=save_dir)
+        # Save scores for analysis
+        all_agent_scores = np.array(all_agent_scores)
+        np.save(os.path.join(save_dir, 'all_scores.npy'), all_scores)
+        return 
 
 def moving_averages(values, window=100):
     return [np.mean(values[:i+1][-window:]) for i, _ in enumerate(values)]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run a trained agent.')
-    parser.add_argument('--env_path', type=str, default="./envs/Reacher_Linux_20_Agents/Reacher.x86_64", help='path to Unity ML Agents environnment file')
+    parser.add_argument('--env_path', type=str, default="./envs/Reacher_Linux_20_Agents_NoVis/Reacher.x86_64", help='path to Unity ML Agents environnment file')
     parser.add_argument('--average_window', type=int, default=100, help='window size for moving average score')
     parser.add_argument('--solve_score', type=int, default=30, help='target score to consider training solved')
     parser.add_argument('--max_episodes', type=int, default=200, help='maximum number of training episodes')
@@ -63,7 +68,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Setup
-    env = env.EnvUnityMLAgents(args.env_path, train_mode=False)
+    env = env.EnvUnityMLAgents(args.env_path, train_mode=True)
     agent = agents.DDPGAgent(env.state_size, env.action_size, random_seed=0)
     trainer = Trainer(agent, env)
 
@@ -71,8 +76,8 @@ if __name__ == "__main__":
     all_scores = trainer.train(
         average_window=args.average_window, 
         solve_score=args.solve_score,
-        max_episodes=args.max_episodes)
-    np.save('all_scores.npy', all_scores)
+        max_episodes=args.max_episodes,
+        save_dir=args.checkpoints_path)
     env.close()
 
     # Plot results
