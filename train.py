@@ -52,8 +52,8 @@ class Trainer:
         self.agent.save(path=save_dir)
         # Save scores for analysis
         all_agent_scores = np.array(all_agent_scores)
-        np.save(os.path.join(save_dir, 'all_scores.npy'), all_scores)
-        return 
+        np.save(os.path.join(save_dir, 'all_scores.npy'), all_agent_scores)
+        return all_agent_scores
 
 def moving_averages(values, window=100):
     return [np.mean(values[:i+1][-window:]) for i, _ in enumerate(values)]
