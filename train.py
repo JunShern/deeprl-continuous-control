@@ -45,7 +45,7 @@ class Trainer:
             print('Episode {} ({:.2f}s) -- Min: {:.2f} -- Max: {:.2f} -- Mean: {:.2f} -- Moving Average: {:.2f}'
                 .format(i, t - self.last_time, np.min(scores), np.max(scores), np.mean(scores), mvg_avg))
             self.last_time = t
-            if mvg_avg > 30 and len(all_agent_scores) >= 100:
+            if mvg_avg > solve_score and len(all_agent_scores) >= average_window:
                 break
         
         # Save model
