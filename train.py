@@ -59,7 +59,7 @@ def moving_averages(values, window=100):
     return [np.mean(values[:i+1][-window:]) for i, _ in enumerate(values)]
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Run a trained agent.')
+    parser = argparse.ArgumentParser(description='Train an agent.')
     parser.add_argument('--env_path', type=str, default="./envs/Reacher_Linux_20_Agents_NoVis/Reacher.x86_64", help='path to Unity ML Agents environnment file')
     parser.add_argument('--average_window', type=int, default=100, help='window size for moving average score')
     parser.add_argument('--solve_score', type=int, default=30, help='target score to consider training solved')
